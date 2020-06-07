@@ -39,7 +39,7 @@ server.post("/savepoint", (req, res) => {
     // console.log(req.body)
 
     // inserir dados no banco de dados
-    const query = `INSERT INT places (image, name, address, address2, state, city, items)
+    const query = `INSERT INTO places (image, name, address, address2, state, city, items)
                    VALUES (?, ?, ?, ?, ?, ?, ?);`
 
     const values = [
@@ -55,7 +55,6 @@ server.post("/savepoint", (req, res) => {
     function afterInsertData(err) {
         if (err) {
             console.log(err)
-            //return res.send("Erro no cadastro!")
             return res.render("create-point.html", { saved: false })
 
         }
@@ -63,17 +62,24 @@ server.post("/savepoint", (req, res) => {
         console.log("Cadastrado com sucesso!")
         console.log(this)
 
-        return res.sender("create-point.html", { saved: true } )
+        return res.render("create-point.html", { saved: true } )
     }
 
     db.run(query, values, afterInsertData)
 })
 
 
-server.get("/search-results", (req, res) => {
+server.get("/search", (req, res) => {
+
+    const search = req.query.search
+
+    if (search == "") {
+        // pesquisa vazia
+        return res.render("search-results.html", { total: 0 })
+    }
 
     // pegar os dados do banco de dados
-    db.all(`SELECT * FROM places`, function (err, rows) {
+    db.all(`SELECT * FROM places WHERE city LIKE '%${search}%'`, function (err, rows) {
         if (err) {
             return console.log(err)
         }
